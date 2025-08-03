@@ -1,5 +1,5 @@
-import { smtpEmailSender } from "@/lib/utils/smtp";
-import MagicLinkEmail from "@/components/email/magic-link-email";
+import { smtpEmailSender } from '@/lib/utils/smtp';
+import MagicLinkEmail from '@/components/email/magic-link-email';
 
 export async function sendVerificationRequest(params: {
   identifier: string;
@@ -14,16 +14,21 @@ export async function sendVerificationRequest(params: {
   const { host } = new URL(url);
 
   try {
-    await smtpEmailSender.emails.send({
-      from: process.env.SMTP_FROM || "info@router.so",
+    console.log(`Attempting to send magic link email to: ${identifier}`);
+    console.log(`SMTP Config - Host: ${process.env.SMTP_HOST}, Port: ${process.env.SMTP_PORT}, User: ${process.env.SMTP_USER}`);
+    
+    const result = await smtpEmailSender.emails.send({
+      from: process.env.SMTP_FROM || 'noreply@allowebs.com',
       to: [identifier],
       subject: `Log in to ${host}`,
       text: text({ url, host }),
       react: MagicLinkEmail({ url, host }),
     });
+    
+    console.log('Email sent successfully:', result.id);
   } catch (error) {
-    console.log(error);
-    throw new Error("Failed to send the verification email.");
+    console.error('Failed to send verification email:', error);
+    throw new Error(`Failed to send the verification email: ${error.message}`);
   }
 }
 

@@ -10,6 +10,8 @@ export const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USER!,
     pass: process.env.SMTP_PASS!,
   },
+  debug: process.env.NODE_ENV === "development", // Enable debug in development
+  logger: process.env.NODE_ENV === "development", // Enable logging in development
 });
 
 // Email sending function compatible with the existing interface

@@ -39,7 +39,7 @@ export default function MagicLinkForm() {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    await signIn("resend", { email: values.email, callbackUrl: callbackUrl });
+    await signIn("email", { email: values.email, callbackUrl: callbackUrl });
   };
 
   return (
