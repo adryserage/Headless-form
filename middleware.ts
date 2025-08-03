@@ -36,10 +36,16 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
+    // Debug: Check if session cookie exists
+    const cookies = request.cookies;
+    const sessionCookie = cookies.get('next-auth.session-token') || cookies.get('__Secure-next-auth.session-token');
+    console.log(`[Middleware] Session cookie found:`, !!sessionCookie);
+    
     const token = await getToken({ 
       req: request, 
       secret: secret,
       salt: "authjs.session-token",
+      secureCookie: process.env.NODE_ENV === 'production',
     });
 
     console.log(`[Middleware] Valid token found:`, !!token);

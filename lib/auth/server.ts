@@ -1,15 +1,15 @@
-import NextAuth from "next-auth";
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { db } from "../db";
-import type { NextAuthConfig } from "next-auth";
-import { User } from "next-auth";
-import GitHub from "next-auth/providers/github";
-import Email from "next-auth/providers/email";
-import { sendVerificationRequest } from "./verification";
-import { users, accounts } from "../db/schema";
-import { eq } from "drizzle-orm";
+import NextAuth from 'next-auth';
+import { DrizzleAdapter } from '@auth/drizzle-adapter';
+import { db } from '../db';
+import type { NextAuthConfig } from 'next-auth';
+import { User } from 'next-auth';
+import GitHub from 'next-auth/providers/github';
+import Email from 'next-auth/providers/email';
+import { sendVerificationRequest } from './verification';
+import { users, accounts } from '../db/schema';
+import { eq } from 'drizzle-orm';
 
-declare module "next-auth" {
+declare module 'next-auth' {
   interface Session {
     user: {
       id: string;
@@ -23,19 +23,31 @@ declare module "next-auth" {
 export const config = {
   adapter: DrizzleAdapter(db),
   session: {
-    strategy: "jwt", // Use JWT for Edge Runtime compatibility in middleware
+    strategy: 'jwt', // Use JWT for Edge Runtime compatibility in middleware
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   trustHost: true,
   experimental: {
     enableWebAuthn: false,
   },
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
+  },
   providers: [
     Email({
-      id: "email",
-      from: process.env.SMTP_FROM || "noreply@example.com",
+      id: 'email',
+      from: process.env.SMTP_FROM || 'noreply@example.com',
       server: {
         host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT || "587"),
+        port: parseInt(process.env.SMTP_PORT || '587'),
         auth: {
           user: process.env.SMTP_USER,
           pass: process.env.SMTP_PASS,
@@ -54,18 +66,21 @@ export const config = {
       return session;
     },
     jwt({ token, user, account }) {
-      console.log(`[JWT] Callback triggered with:`, { 
-        hasUser: !!user, 
-        hasToken: !!token, 
-        provider: account?.provider 
+      console.log(`[JWT] Callback triggered with:`, {
+        hasUser: !!user,
+        hasToken: !!token,
+        provider: account?.provider,
       });
-      
+
       if (user) {
         token.id = user.id;
         token.email = user.email;
-        console.log(`[JWT] Setting token data:`, { id: user.id, email: user.email });
+        console.log(`[JWT] Setting token data:`, {
+          id: user.id,
+          email: user.email,
+        });
       }
-      
+
       return token;
     },
     authorized: async ({ auth }) => {
@@ -73,44 +88,24 @@ export const config = {
     },
     redirect({ url, baseUrl }) {
       // Redirect to dashboard after successful login
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      if (url.startsWith('/')) return `${baseUrl}${url}`;
       else if (new URL(url).origin === baseUrl) return url;
       return baseUrl;
     },
     async signIn({ user, account, profile }) {
-      if (!user.email || !account) return false;
-      
-      // For OAuth providers, check if user exists and link accounts
-      if (account.provider !== "email") {
-        try {
-          console.log(`[Auth] OAuth sign-in attempt for ${user.email} via ${account.provider}`);
-          
-          // Check if user already exists with this email
-          const existingUser = await db
-            .select()
-            .from(users)
-            .where(eq(users.email, user.email))
-            .limit(1);
-          
-          if (existingUser.length > 0) {
-            console.log(`[Auth] Found existing user, allowing account linking for ${user.email}`);
-            // User exists, allow linking by setting the user ID
-            user.id = existingUser[0].id;
-          }
-          
-          return true;
-        } catch (error) {
-          console.error(`[Auth] Error during account linking:`, error);
-          return false;
-        }
-      }
-      
+      console.log(`[Auth] SignIn callback triggered:`, {
+        email: user.email,
+        provider: account?.provider,
+        hasUser: !!user,
+        hasAccount: !!account,
+      });
+
       return true;
     },
   },
   pages: {
-    signIn: "/login",
-    verifyRequest: "/check-email",
+    signIn: '/login',
+    verifyRequest: '/check-email',
   },
 } satisfies NextAuthConfig;
 
