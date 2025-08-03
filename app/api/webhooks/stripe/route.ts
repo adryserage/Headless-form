@@ -7,11 +7,20 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { STRIPE_PLANS } from "@/lib/constants/stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_placeholder");
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "whsec_placeholder";
 
 export async function POST(request: Request) {
   try {
+    // Check if required environment variables are available
+    if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+      console.error("Missing required Stripe environment variables");
+      return NextResponse.json(
+        { error: "Stripe configuration missing" },
+        { status: 500 }
+      );
+    }
+
     const body = await request.text();
     const signature = headers().get("stripe-signature")!;
 

@@ -7,11 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { File } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { loadEnvConfig } from "@next/env";
 import Link from "next/link";
 import OptionsDropdown from "./options-dropdown";
-
-loadEnvConfig("./", process.env.NODE_ENV !== "production");
 
 export const columns: ColumnDef<Endpoint>[] = [
   {
@@ -72,21 +69,16 @@ export const columns: ColumnDef<Endpoint>[] = [
           variant="outline"
           size="sm"
           onClick={() => {
-            navigator.clipboard.writeText(
-              `${
-                process.env.NODE_ENV === "development"
-                  ? "http://localhost:3000"
-                  : process.env.APP_URL
-              }/api/endpoints/${id}`,
-            );
+            const baseUrl = typeof window !== 'undefined' 
+              ? window.location.origin 
+              : "http://localhost:3000";
+            navigator.clipboard.writeText(`${baseUrl}/api/endpoints/${id}`);
             toast.success("Endpoint Copied");
           }}
         >
-          {`${
-            process.env.NODE_ENV === "development"
-              ? "http://localhost:3000"
-              : process.env.APP_URL
-          }/api/endpoints/${id}`}
+          {typeof window !== 'undefined' 
+            ? `${window.location.origin}/api/endpoints/${id}`
+            : `/api/endpoints/${id}`}
         </Button>
       );
     },
