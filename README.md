@@ -81,4 +81,15 @@ After creating your accounts, update your `.env.example` to be `.env.local` for 
 - [Vercel Documentation](https://vercel.com/docs)
 - [Nodemailer Documentation](https://nodemailer.com/about/)
 
+## Recent Updates
+
+### ESLint and TypeScript Configuration (January 2025)
+
+- **Updated ESLint Configuration**: Migrated from deprecated `.eslintrc.json` to modern flat config (`eslint.config.js`) compatible with ESLint v9
+- **Fixed NextAuth.js v5 Compatibility**: Updated middleware to use the modern `auth()` function instead of deprecated `getToken()` from `next-auth/jwt`
+- **Resolved TypeScript Errors**: Fixed missing `salt` property issues in authentication middleware
+- **Build Optimization**: All linting and type checking now passes successfully
+
+These updates ensure compatibility with the latest versions of ESLint (v9.32.0) and NextAuth.js (v5.0.0-beta.20).
+
 For any issues or questions, please open an issue on the [GitHub repository](https://github.com/routerso/router).

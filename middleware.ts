@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { auth } from "./lib/auth";
 
 export async function middleware(request: NextRequest) {
   // Get the pathname of the request
@@ -21,28 +21,25 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check if user is authenticated using JWT
+  // Check if user is authenticated using NextAuth v5
   console.log(`[Middleware] Checking authentication for: ${pathname}`);
   
   try {
-    const token = await getToken({
-      req: request,
-      secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
-    });
+    const session = await auth();
 
-    console.log(`[Middleware] Token found:`, !!token);
+    console.log(`[Middleware] Session found:`, !!session);
 
     // If not authenticated, redirect to login
-    if (!token) {
-      console.log(`[Middleware] No token, redirecting to login`);
+    if (!session) {
+      console.log(`[Middleware] No session, redirecting to login`);
       const loginUrl = new URL("/login", request.url);
       return NextResponse.redirect(loginUrl);
     }
 
-    console.log(`[Middleware] Token valid, allowing access`);
+    console.log(`[Middleware] Session valid, allowing access`);
     return NextResponse.next();
   } catch (error) {
-    console.error(`[Middleware] Error checking token:`, error);
+    console.error(`[Middleware] Error checking session:`, error);
     const loginUrl = new URL("/login", request.url);
     return NextResponse.redirect(loginUrl);
   }
@@ -52,4 +49,5 @@ export const config = {
   matcher: [
     "/((?!api|_next/static|_next/image|favicon.ico|check-email|.*\\.svg$).*)",
   ],
+  runtime: 'nodejs',
 };
