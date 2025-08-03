@@ -97,9 +97,8 @@ ${multiselectOptions}
 
   return `<form action="${url}" method="GET">
     ${schema.map((field) => {
-      const label = field.label || field.key;
-      return `<!-- ${label}: ${field.value}${field.required ? ', Required' : ''} -->
-    <label for="${field.key}">${label}</label>
+      return `<!-- ${field.key}: ${field.value}${field.required ? ', Required' : ''} -->
+    <label for="${field.key}">${field.key}</label>
     ${getHtmlInput(field)}`;
     }).join('\n    \n')}
     

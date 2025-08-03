@@ -28,7 +28,8 @@ export async function middleware(request: NextRequest) {
     // Get and validate the JWT token (Edge Runtime compatible)
     const token = await getToken({ 
       req: request, 
-      secret: process.env.NEXTAUTH_SECRET 
+      secret: process.env.NEXTAUTH_SECRET || '',
+      salt: 'authjs.session-token'
     });
 
     console.log(`[Middleware] Valid token found:`, !!token);
