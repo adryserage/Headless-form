@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { auth } from "@/lib/auth";
 
 export async function middleware(request: NextRequest) {
   // Get the pathname of the request
@@ -8,35 +8,33 @@ export async function middleware(request: NextRequest) {
 
   console.log(`[Middleware] ${request.method} ${pathname}`);
 
-  // Allow access to auth pages and API routes
+  // Allow access to auth pages, API routes, and static files ONLY
   if (
     pathname.startsWith("/api/") ||
     pathname.startsWith("/_next/") ||
     pathname.startsWith("/check-email") ||
     pathname.startsWith("/login") ||
-    pathname.includes(".") || // Static files
-    pathname === "/"
+    pathname.includes(".") || // Static files (css, js, images, etc)
+    pathname === "/favicon.ico"
   ) {
     console.log(`[Middleware] Allowing access to: ${pathname}`);
     return NextResponse.next();
   }
 
-  // Check if user is authenticated using NextAuth JWT (Edge Runtime compatible)
+  // Authentication is now enabled with GitHub OAuth as backup
+
+  // Check if user is authenticated using NextAuth
   console.log(`[Middleware] Checking authentication for: ${pathname}`);
   
   try {
-    // Get and validate the JWT token (Edge Runtime compatible)
-    const token = await getToken({ 
-      req: request, 
-      secret: process.env.NEXTAUTH_SECRET || '',
-      salt: 'authjs.session-token'
-    });
+    // Get the session using NextAuth
+    const session = await auth();
 
-    console.log(`[Middleware] Valid token found:`, !!token);
+    console.log(`[Middleware] Valid session found:`, !!session);
 
-    // If no valid token, redirect to login
-    if (!token) {
-      console.log(`[Middleware] No valid token, redirecting to login`);
+    // If no valid session, redirect to login
+    if (!session) {
+      console.log(`[Middleware] No valid session, redirecting to login`);
       const loginUrl = new URL("/login", request.url);
       return NextResponse.redirect(loginUrl);
     }
@@ -44,7 +42,7 @@ export async function middleware(request: NextRequest) {
     console.log(`[Middleware] Authentication successful, allowing access`);
     return NextResponse.next();
   } catch (error) {
-    console.error(`[Middleware] Error validating token:`, error);
+    console.error(`[Middleware] Error validating session:`, error);
     const loginUrl = new URL("/login", request.url);
     return NextResponse.redirect(loginUrl);
   }
@@ -52,6 +50,12 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|check-email|.*\\.svg$).*)",
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next (Next.js internals)
+     * - static files (images, etc)
+     */
+    "/((?!api|_next|.*\\.).*)",
   ],
 };

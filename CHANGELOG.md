@@ -18,6 +18,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Fixed
 
+- **Form Validation Logic** - Corrected optional field handling (1b57a3c)
+  - Fixed validation schemas that incorrectly made all fields required
+  - Updated `generateDynamicSchema` to respect required field setting
+  - Optional fields now properly work as optional during form submission
+  - Removed hardcoded `.min(1)` validations for conditional application
+
+- **TypeScript Compatibility** - Resolved compilation errors (34b147d)
+  - Fixed form generation function type definitions
+  - Corrected middleware JWT token validation types
+  - Added proper TypeScript casting for Zod validation schemas
+  - Ensured NextAuth.js integration works with latest type definitions
+
 - **Edge Runtime Compatibility** - Complete resolution of Node.js module errors (f85fbb9, 60b91a4, 8cc8d9b, 6d0cc49)
   - Replaced Node.js crypto with Web Crypto API for universal compatibility
   - Added Node.js runtime configuration to all API routes

@@ -8,19 +8,27 @@ import Email from "next-auth/providers/email";
 import { sendVerificationRequest } from "./verification";
 
 declare module "next-auth" {
-  interface Session extends User {
+  interface Session {
     user: {
       id: string;
-    } & Session;
+      email?: string | null;
+      name?: string | null;
+      image?: string | null;
+    };
   }
 }
 
 export const config = {
   adapter: DrizzleAdapter(db),
   session: {
-    strategy: "jwt",
+    strategy: "database",
   },
   trustHost: true,
+  experimental: {
+    enableWebAuthn: false,
+  },
+  // Allow linking accounts with the same email address
+  allowDangerousEmailAccountLinking: true,
   providers: [
     Email({
       id: "email",
@@ -35,7 +43,10 @@ export const config = {
       },
       sendVerificationRequest,
     }),
-    GitHub, // optional GitHub provider
+    GitHub({
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+    }), // GitHub OAuth provider
   ],
   callbacks: {
     session({ session, token }) {
@@ -50,6 +61,16 @@ export const config = {
     },
     authorized: async ({ auth }) => {
       return !!auth;
+    },
+    redirect({ url, baseUrl }) {
+      // Redirect to dashboard after successful login
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
+    },
+    async signIn({ user, account, profile, email, credentials }) {
+      // Allow sign in for all cases to handle account linking
+      return true;
     },
   },
   pages: {
