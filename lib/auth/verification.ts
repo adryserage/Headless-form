@@ -1,24 +1,26 @@
-import { resend } from "@/lib/utils/resend";
+import { smtpEmailSender } from "@/lib/utils/smtp";
 import MagicLinkEmail from "@/components/email/magic-link-email";
 
 export async function sendVerificationRequest(params: {
   identifier: string;
   url: string;
-  provider: string;
-  theme: string;
+  expires: Date;
+  provider: any;
+  token: string;
+  theme: any;
+  request: Request;
 }) {
   const { identifier, url } = params;
   const { host } = new URL(url);
 
   try {
-    const data = await resend.emails.send({
-      from: "info@router.so",
+    await smtpEmailSender.emails.send({
+      from: process.env.SMTP_FROM || "info@router.so",
       to: [identifier],
       subject: `Log in to ${host}`,
       text: text({ url, host }),
       react: MagicLinkEmail({ url, host }),
     });
-    return data;
   } catch (error) {
     console.log(error);
     throw new Error("Failed to send the verification email.");

@@ -3,8 +3,8 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { db } from "../db";
 import type { NextAuthConfig } from "next-auth";
 import { User } from "next-auth";
-import Resend from "next-auth/providers/resend";
 import GitHub from "next-auth/providers/github";
+import { sendVerificationRequest } from "./verification";
 
 declare module "next-auth" {
   interface Session extends User {
@@ -20,11 +20,15 @@ export const config = {
     strategy: "jwt",
   },
   providers: [
-    Resend({
-      apiKey: process.env.RESEND_API_KEY!,
-      from: "info@router.so",
-      // sendVerificationRequest, -> TODO: send custom email
-    }),
+    {
+      id: "email",
+      type: "email",
+      name: "Email",
+      from: process.env.SMTP_FROM || "noreply@example.com",
+      maxAge: 24 * 60 * 60, // 24 hours
+      options: {},
+      sendVerificationRequest,
+    },
     GitHub, // optional GitHub provider
   ],
   callbacks: {
