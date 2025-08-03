@@ -6,6 +6,8 @@ import { User } from "next-auth";
 import GitHub from "next-auth/providers/github";
 import Email from "next-auth/providers/email";
 import { sendVerificationRequest } from "./verification";
+import { users, accounts } from "../db/schema";
+import { eq } from "drizzle-orm";
 
 declare module "next-auth" {
   interface Session {
@@ -27,8 +29,6 @@ export const config = {
   experimental: {
     enableWebAuthn: false,
   },
-  // Allow linking accounts with the same email address
-  allowDangerousEmailAccountLinking: true,
   providers: [
     Email({
       id: "email",
@@ -68,8 +68,34 @@ export const config = {
       else if (new URL(url).origin === baseUrl) return url;
       return baseUrl;
     },
-    async signIn({ user, account, profile, email, credentials }) {
-      // Allow sign in for all cases to handle account linking
+    async signIn({ user, account, profile }) {
+      if (!user.email || !account) return false;
+      
+      // For OAuth providers, check if user exists and link accounts
+      if (account.provider !== "email") {
+        try {
+          console.log(`[Auth] OAuth sign-in attempt for ${user.email} via ${account.provider}`);
+          
+          // Check if user already exists with this email
+          const existingUser = await db
+            .select()
+            .from(users)
+            .where(eq(users.email, user.email))
+            .limit(1);
+          
+          if (existingUser.length > 0) {
+            console.log(`[Auth] Found existing user, allowing account linking for ${user.email}`);
+            // User exists, allow linking by setting the user ID
+            user.id = existingUser[0].id;
+          }
+          
+          return true;
+        } catch (error) {
+          console.error(`[Auth] Error during account linking:`, error);
+          return false;
+        }
+      }
+      
       return true;
     },
   },
