@@ -18,6 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Fixed
 
+- **Authentication System** - Resolved OAuthAccountNotLinked error and enhanced security (e7113b7)
+  - Fixed GitHub OAuth account linking by switching to database sessions
+  - Enabled `allowDangerousEmailAccountLinking` for proper account integration
+  - Updated middleware to use `auth()` instead of JWT tokens for session validation
+  - Enhanced security by protecting ALL pages (removed home page bypass)
+  - Added proper redirect callback for post-login navigation
+
 - **Form Validation Logic** - Corrected optional field handling (1b57a3c)
   - Fixed validation schemas that incorrectly made all fields required
   - Updated `generateDynamicSchema` to respect required field setting
@@ -49,6 +56,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `@eslint/eslintrc` package for compatibility
   - Compatible with ESLint v9.32.0 and NextAuth.js v5.0.0-beta.20
   - Resolved merge conflicts and maintained documentation
+
+### 🔒 Security
+
+- **Complete Authentication Protection** - Enhanced application security (e7113b7)
+  - All application routes now require authentication (no unauthenticated access)
+  - Implemented proper GitHub OAuth integration with account linking
+  - Switched to database sessions for improved security and functionality
+  - Enhanced middleware protection covering all pages except auth endpoints
 
 ### 🏠 Internal
 
