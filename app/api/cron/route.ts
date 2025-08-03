@@ -1,6 +1,9 @@
 import type { NextRequest } from "next/server";
 import { clearLeadCount } from "@/lib/data/users";
 
+// Force Node.js runtime for database operations
+export const runtime = 'nodejs';
+
 /**
  * Cron job to clear lead count run through Vercel
  *

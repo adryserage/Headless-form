@@ -16,6 +16,9 @@ import {
   getLeadCount,
 } from "@/lib/data/users";
 
+// Force Node.js runtime to support crypto module
+export const runtime = 'nodejs';
+
 /**
  * API route for posting a lead using POST
  */

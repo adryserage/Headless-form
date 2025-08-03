@@ -7,6 +7,9 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { STRIPE_PLANS } from "@/lib/constants/stripe";
 
+// Force Node.js runtime for Stripe webhooks and database operations
+export const runtime = 'nodejs';
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_placeholder");
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "whsec_placeholder";
 
