@@ -21,7 +21,7 @@ import {
  */
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const headersList = headers();
@@ -30,7 +30,7 @@ export async function POST(
     if (!authorization || !authorization.startsWith("Bearer ")) {
       return NextResponse.json(
         { message: "Unauthorized. No valid bearer token provided." },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -41,20 +41,20 @@ export async function POST(
     if (!endpoint)
       return NextResponse.json(
         { message: "Endpoint not found." },
-        { status: 404 }
+        { status: 404 },
       );
 
     if (endpoint.token !== token) {
       return NextResponse.json(
         { message: "Unauthorized. Invalid token provided." },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     if (!endpoint.enabled) {
       return NextResponse.json(
         { message: "Endpoint is disabled." },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -85,7 +85,7 @@ export async function POST(
     if (leadCount >= leadLimit) {
       return NextResponse.json(
         { message: "Lead limit reached." },
-        { status: 429 }
+        { status: 429 },
       );
     }
 
@@ -98,12 +98,12 @@ export async function POST(
         "error",
         "http",
         JSON.stringify(parsedData.error.format()),
-        endpoint.id
+        endpoint.id,
       );
 
       return NextResponse.json(
         { errors: parsedData.error.format() },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -153,7 +153,7 @@ export async function POST(
           "success",
           "webhook",
           `${endpoint.webhook} -> Webhook successful`,
-          params.id
+          params.id,
         );
       }
     }
@@ -175,7 +175,7 @@ export async function POST(
  */
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const headersList = headers();
@@ -187,14 +187,14 @@ export async function GET(
     if (!endpoint) {
       return NextResponse.json(
         { message: "Endpoint not found." },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     if (!endpoint.enabled) {
       return NextResponse.json(
         { message: "Endpoint is disabled." },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -225,7 +225,7 @@ export async function GET(
     if (leadCount >= leadLimit) {
       return NextResponse.json(
         { message: "Lead limit reached." },
-        { status: 429 }
+        { status: 429 },
       );
     }
 
@@ -240,11 +240,11 @@ export async function GET(
         "error",
         "http",
         JSON.stringify(parsedData.error.format()),
-        endpoint.id
+        endpoint.id,
       );
 
       return NextResponse.redirect(
-        new URL(endpoint?.failUrl || referer || "/fail")
+        new URL(endpoint?.failUrl || referer || "/fail"),
       );
     }
 
@@ -293,13 +293,13 @@ export async function GET(
           "success",
           "webhook",
           `${endpoint.webhook} -> Webhook successful`,
-          params.id
+          params.id,
         );
       }
     }
 
     return NextResponse.redirect(
-      new URL(endpoint?.successUrl || referer || "/success")
+      new URL(endpoint?.successUrl || referer || "/success"),
     );
   } catch (error: unknown) {
     await createLog("error", "http", getErrorMessage(error), params.id);

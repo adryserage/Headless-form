@@ -61,7 +61,7 @@ export const accounts = pgTable(
     compoundKey: primaryKey({
       columns: [account.provider, account.providerAccountId],
     }),
-  })
+  }),
 );
 
 export const sessions = pgTable("session", {
@@ -81,7 +81,7 @@ export const verificationTokens = pgTable(
   },
   (vt) => ({
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
-  })
+  }),
 );
 
 export const endpoints = pgTable("endpoint", {
@@ -93,9 +93,7 @@ export const endpoints = pgTable("endpoint", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
-  schema: jsonb("schema")
-    .$type<GeneralSchema[]>()
-    .notNull(),
+  schema: jsonb("schema").$type<GeneralSchema[]>().notNull(),
   enabled: boolean("enabled").default(true).notNull(),
   webhookEnabled: boolean("webhookEnabled").default(false).notNull(),
   emailNotify: boolean("emailNotify").default(false).notNull(),

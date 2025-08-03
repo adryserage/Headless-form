@@ -96,10 +96,15 @@ export default function CreateForm() {
           <h3 className="text-sm font-medium">Schema</h3>
           {fields.map((field: any, index: any) => {
             const selectedFieldType = form.watch(`schema.${index}.value`);
-            const needsOptions = ["select", "multiselect", "radio", "checkbox"].includes(selectedFieldType);
+            const needsOptions = [
+              "select",
+              "multiselect",
+              "radio",
+              "checkbox",
+            ].includes(selectedFieldType);
             const needsRange = ["range", "number"].includes(selectedFieldType);
             const needsFile = selectedFieldType === "file";
-            
+
             return (
               <div key={field.id} className="border rounded-lg p-4 space-y-4">
                 {/* Field Name and Type Row */}
@@ -136,11 +141,13 @@ export default function CreateForm() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {validationOptions.map((type, typeIndex: number) => (
-                                <SelectItem key={typeIndex} value={type.name}>
-                                  {type.name}
-                                </SelectItem>
-                              ))}
+                              {validationOptions.map(
+                                (type, typeIndex: number) => (
+                                  <SelectItem key={typeIndex} value={type.name}>
+                                    {type.name}
+                                  </SelectItem>
+                                ),
+                              )}
                             </SelectContent>
                           </Select>
                           <Button
@@ -165,7 +172,9 @@ export default function CreateForm() {
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between">
                       <div className="space-y-0.5">
-                        <FormLabel className="text-sm">Required Field</FormLabel>
+                        <FormLabel className="text-sm">
+                          Required Field
+                        </FormLabel>
                       </div>
                       <FormControl>
                         <Switch
@@ -183,7 +192,9 @@ export default function CreateForm() {
                   name={`schema.${index}.placeholder`}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm">Placeholder Text (Optional)</FormLabel>
+                      <FormLabel className="text-sm">
+                        Placeholder Text (Optional)
+                      </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -202,14 +213,18 @@ export default function CreateForm() {
                     name={`schema.${index}.options`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm">Options (one per line)</FormLabel>
+                        <FormLabel className="text-sm">
+                          Options (one per line)
+                        </FormLabel>
                         <FormControl>
                           <textarea
                             className="w-full min-h-[100px] p-3 rounded-md border bg-secondary resize-vertical"
                             placeholder="Option 1&#10;Option 2&#10;Option 3"
-                            value={field.value?.join('\n') || ''}
+                            value={field.value?.join("\n") || ""}
                             onChange={(e) => {
-                              const options = e.target.value.split('\n').filter(opt => opt.trim());
+                              const options = e.target.value
+                                .split("\n")
+                                .filter((opt) => opt.trim());
                               field.onChange(options);
                             }}
                           />
@@ -235,7 +250,13 @@ export default function CreateForm() {
                               type="number"
                               className="bg-secondary"
                               placeholder="0"
-                              onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value
+                                    ? Number(e.target.value)
+                                    : undefined,
+                                )
+                              }
                             />
                           </FormControl>
                         </FormItem>
@@ -253,7 +274,13 @@ export default function CreateForm() {
                               type="number"
                               className="bg-secondary"
                               placeholder="100"
-                              onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value
+                                    ? Number(e.target.value)
+                                    : undefined,
+                                )
+                              }
                             />
                           </FormControl>
                         </FormItem>
@@ -271,7 +298,13 @@ export default function CreateForm() {
                               type="number"
                               className="bg-secondary"
                               placeholder="1"
-                              onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value
+                                    ? Number(e.target.value)
+                                    : undefined,
+                                )
+                              }
                             />
                           </FormControl>
                         </FormItem>
@@ -288,7 +321,9 @@ export default function CreateForm() {
                       name={`schema.${index}.accept`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm">Accepted File Types</FormLabel>
+                          <FormLabel className="text-sm">
+                            Accepted File Types
+                          </FormLabel>
                           <FormControl>
                             <Input
                               {...field}
@@ -305,7 +340,9 @@ export default function CreateForm() {
                       render={({ field }) => (
                         <FormItem className="flex flex-row items-center justify-between">
                           <div className="space-y-0.5">
-                            <FormLabel className="text-sm">Multiple Files</FormLabel>
+                            <FormLabel className="text-sm">
+                              Multiple Files
+                            </FormLabel>
                           </div>
                           <FormControl>
                             <Switch

@@ -31,7 +31,7 @@ export const smtpEmailSender = {
       react?: React.ReactElement;
     }) => {
       const htmlContent = react ? await render(react) : undefined;
-      
+
       const mailOptions = {
         from: from || process.env.SMTP_FROM!,
         to: to.join(", "),

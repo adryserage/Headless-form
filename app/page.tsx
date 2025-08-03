@@ -114,7 +114,7 @@ export default async function Page() {
 const navLinks = [
   {
     name: "Endpoints",
-    description: "Create and Manage Router.so Endpoints",
+    description: "Create and Manage Headless Form Endpoints",
     href: "/endpoints",
   },
   {

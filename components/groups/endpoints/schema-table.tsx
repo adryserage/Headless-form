@@ -48,12 +48,8 @@ export default function SchemaTable({ schema }: { schema: GeneralSchema[] }) {
                     {field?.step && ` (step: ${field.step})`}
                   </div>
                 )}
-                {field?.accept && (
-                  <div>File types: {field.accept}</div>
-                )}
-                {field?.multiple && (
-                  <div>Multiple files allowed</div>
-                )}
+                {field?.accept && <div>File types: {field.accept}</div>}
+                {field?.multiple && <div>Multiple files allowed</div>}
               </TableCell>
             </TableRow>
           ))}

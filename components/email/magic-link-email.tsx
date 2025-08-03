@@ -15,7 +15,7 @@ export default function MagicLinkEmail({
         If you didn&apos;t try to login, you can safely ignore this email.
       </p>
       <a href="https://router.so" target="_blank" className="underline">
-        router.so
+        Headless Form
       </a>
     </>
   );

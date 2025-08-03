@@ -19,7 +19,8 @@ import Icon from "@/public/icon.svg";
 import CopyButton from "@/components/parts/copy-button";
 import { generateShadcnForm } from "@/lib/helpers/generate-form";
 import { notFound } from "next/navigation";
-
+import { loadEnvConfig } from "@next/env";
+loadEnvConfig("./", process.env.NODE_ENV !== "production");
 const pageData = {
   title: "Endpoint",
   description: "Schema details and posting instructions for your endpoint",
@@ -35,7 +36,11 @@ export default async function Page({ params }: { params: { id: string } }) {
 
   const schema = endpointData?.schema as GeneralSchema[];
 
-  const url = `https://app.router.so/api/endpoints/${endpointData.id}`;
+  const url = `${
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:3000"
+      : process.env.APP_URL
+  }/api/endpoints/${endpointData.id}`;
 
   //  ---------- TODO: make this into its own function ----------
   const formattedSchema = new Object() as { [key: string]: ValidationType };
@@ -66,9 +71,9 @@ export default async function Page({ params }: { params: { id: string } }) {
           field.value === "boolean"
             ? "checkbox"
             : field.value === "number"
-            ? "number"
-            : "text"
-        }" name="${field.key}" />`
+              ? "number"
+              : "text"
+        }" name="${field.key}" />`,
     )}
     <button type="submit" value="Submit" />
   </form>`;
@@ -164,7 +169,8 @@ export default async function Page({ params }: { params: { id: string } }) {
                 user will be redirected to these URLs. The best experience for
                 the user is to provide some sort of client-side validation on
                 your inputs so that the user cannot submit the form until all
-                inputs are valid. Router.so only does server-side validation.{" "}
+                inputs are valid. Headless Form only does server-side
+                validation.{" "}
                 <span className="text-red-500">
                   Please ensure you add validation on the client for the best
                   user experience.
@@ -215,7 +221,7 @@ function Breadcrumbs({ endpointId }: { endpointId: string }) {
         src={Icon}
         width={24}
         height={24}
-        alt="Router.so Icon"
+        alt="Headless Form Icon"
       />
     </Breadcrumb>
   );

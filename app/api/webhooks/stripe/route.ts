@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     const event = stripe.webhooks.constructEvent(
       body,
       signature,
-      webhookSecret
+      webhookSecret,
     );
 
     // Handle checkout session completion
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
       // Get the price ID from the session
       const lineItems = await stripe.checkout.sessions.listLineItems(
-        session.id
+        session.id,
       );
       const priceId = lineItems.data[0].price?.id;
 
@@ -146,7 +146,7 @@ export async function POST(request: Request) {
     console.error("Stripe webhook error:", error);
     return NextResponse.json(
       { error: "Webhook handler failed" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 }

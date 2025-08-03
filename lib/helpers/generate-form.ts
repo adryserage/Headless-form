@@ -64,7 +64,7 @@ export const generateShadcnForm = (schema: GeneralSchema[]): string => {
 
   const getFieldComponent = (field: GeneralSchema, fieldDef: GeneralSchema) => {
     const placeholder = fieldDef.placeholder || field.key;
-    
+
     if (fieldDef.value === "boolean") {
       return `
         <Switch
@@ -113,7 +113,7 @@ export const generateShadcnForm = (schema: GeneralSchema[]): string => {
             <SelectValue placeholder="${placeholder}" />
           </SelectTrigger>
           <SelectContent>
-            ${options.map(option => `<SelectItem value="${option}">${option}</SelectItem>`).join('\n            ')}
+            ${options.map((option) => `<SelectItem value="${option}">${option}</SelectItem>`).join("\n            ")}
           </SelectContent>
         </Select>
       `;
@@ -200,11 +200,11 @@ export const generateShadcnForm = (schema: GeneralSchema[]): string => {
         <Input
           type="file"
           accept="${accept}"
-          ${multiple ? 'multiple' : ''}
+          ${multiple ? "multiple" : ""}
           onChange={(e) => {
             const files = e.target.files;
             if (files && files.length > 0) {
-              ${multiple ? 'field.onChange(Array.from(files).map(f => f.name));' : 'field.onChange(files[0].name);'}
+              ${multiple ? "field.onChange(Array.from(files).map(f => f.name));" : "field.onChange(files[0].name);"}
             }
           }}
         />
@@ -217,18 +217,24 @@ export const generateShadcnForm = (schema: GeneralSchema[]): string => {
         />
       `;
     } else {
-      const inputType = fieldDef.value === "number" ? "number" : 
-                       fieldDef.value === "email" ? "email" : 
-                       fieldDef.value === "url" ? "url" : 
-                       fieldDef.value === "phone" ? "tel" : "text";
+      const inputType =
+        fieldDef.value === "number"
+          ? "number"
+          : fieldDef.value === "email"
+            ? "email"
+            : fieldDef.value === "url"
+              ? "url"
+              : fieldDef.value === "phone"
+                ? "tel"
+                : "text";
       return `
         <Input
           placeholder="${placeholder}"
           {...field}
           type="${inputType}"
-          ${fieldDef.min !== undefined ? `min={${fieldDef.min}}` : ''}
-          ${fieldDef.max !== undefined ? `max={${fieldDef.max}}` : ''}
-          ${fieldDef.step !== undefined ? `step={${fieldDef.step}}` : ''}
+          ${fieldDef.min !== undefined ? `min={${fieldDef.min}}` : ""}
+          ${fieldDef.max !== undefined ? `max={${fieldDef.max}}` : ""}
+          ${fieldDef.step !== undefined ? `step={${fieldDef.step}}` : ""}
         />
       `;
     }
@@ -238,9 +244,13 @@ export const generateShadcnForm = (schema: GeneralSchema[]): string => {
   const hasDateField = schema.some((field) => field.value === "date");
   const hasTextareaField = schema.some((field) => field.value === "textarea");
   const hasSelectField = schema.some((field) => field.value === "select");
-  const hasMultiselectField = schema.some((field) => field.value === "multiselect");
+  const hasMultiselectField = schema.some(
+    (field) => field.value === "multiselect",
+  );
   const hasRadioField = schema.some((field) => field.value === "radio");
-  const hasCheckboxField = schema.some((field) => field.value === "checkbox" || field.value === "multiselect");
+  const hasCheckboxField = schema.some(
+    (field) => field.value === "checkbox" || field.value === "multiselect",
+  );
   const hasRangeField = schema.some((field) => field.value === "range");
 
   return `"use client";
@@ -350,7 +360,7 @@ export function RouterForm() {
             <FormItem>
               <FormLabel>${field.key}</FormLabel>
               <FormControl>
-                ${getFieldComponent(field, schema.find(f => f.key === field.key)!)}
+                ${getFieldComponent(field, schema.find((f) => f.key === field.key)!)}
               </FormControl>
               <FormDescription>
                 ${`Enter the ${field.key} for the endpoint.`}
@@ -359,7 +369,7 @@ export function RouterForm() {
             </FormItem>
           )}
         />
-        `
+        `,
           )
           .join("")}
         <Button type="submit">Submit</Button>

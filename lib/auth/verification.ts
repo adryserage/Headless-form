@@ -1,5 +1,5 @@
-import { smtpEmailSender } from '@/lib/utils/smtp';
-import MagicLinkEmail from '@/components/email/magic-link-email';
+import { smtpEmailSender } from "@/lib/utils/smtp";
+import MagicLinkEmail from "@/components/email/magic-link-email";
 
 export async function sendVerificationRequest(params: {
   identifier: string;
@@ -15,20 +15,24 @@ export async function sendVerificationRequest(params: {
 
   try {
     console.log(`Attempting to send magic link email to: ${identifier}`);
-    console.log(`SMTP Config - Host: ${process.env.SMTP_HOST}, Port: ${process.env.SMTP_PORT}, User: ${process.env.SMTP_USER}`);
-    
+    console.log(
+      `SMTP Config - Host: ${process.env.SMTP_HOST}, Port: ${process.env.SMTP_PORT}, User: ${process.env.SMTP_USER}`,
+    );
+
     const result = await smtpEmailSender.emails.send({
-      from: process.env.SMTP_FROM || 'noreply@allowebs.com',
+      from: process.env.SMTP_FROM || "noreply@allowebs.com",
       to: [identifier],
       subject: `Log in to ${host}`,
       text: text({ url, host }),
       react: MagicLinkEmail({ url, host }),
     });
-    
-    console.log('Email sent successfully:', result.id);
+
+    console.log("Email sent successfully:", result.id);
   } catch (error) {
-    console.error('Failed to send verification email:', error);
-    throw new Error(`Failed to send the verification email: ${error instanceof Error ? error.message : String(error)}`);
+    console.error("Failed to send verification email:", error);
+    throw new Error(
+      `Failed to send the verification email: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 }
 
