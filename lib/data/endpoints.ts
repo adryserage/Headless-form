@@ -11,7 +11,7 @@ import {
   createEndpointFormSchema,
   updateEndpointFormSchema,
 } from "./validations";
-import { randomBytes } from "crypto";
+// Using Web Crypto API instead of Node.js crypto for Edge Runtime compatibility
 import { redirect } from "next/navigation";
 
 /**
@@ -110,7 +110,10 @@ export const enableEndpoint = authenticatedAction
 export const createEndpoint = authenticatedAction
   .schema(createEndpointFormSchema)
   .action(async ({ parsedInput, ctx: { userId } }) => {
-    const token = randomBytes(32).toString("hex");
+    // Generate random token using Web Crypto API (Edge Runtime compatible)
+    const tokenBytes = new Uint8Array(32);
+    crypto.getRandomValues(tokenBytes);
+    const token = Array.from(tokenBytes, byte => byte.toString(16).padStart(2, '0')).join('');
     await db.insert(endpoints).values({
       userId,
       name: parsedInput.name,
