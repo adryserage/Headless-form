@@ -5,7 +5,33 @@ All notable changes to the Headless Form project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2025-08-02
+## [Unreleased] - 2025-08-03
+
+### 🐛 Fixed
+
+- **Edge Runtime Compatibility** - Fixed Node.js stream module error in Edge Runtime (6d0cc49)
+  - Forced NextAuth.js API route to use Node.js runtime
+  - Enables nodemailer SMTP functionality for email verification
+  - Resolves Edge Runtime stream module compatibility issues
+
+### 🔧 Changed
+
+- **ESLint Configuration** - Migrated to modern flat config system (177411a, b5a0fa9)
+  - Updated from deprecated `.eslintrc.json` to `eslint.config.js`
+  - Added `@eslint/eslintrc` package for compatibility
+  - Compatible with ESLint v9.32.0 and NextAuth.js v5.0.0-beta.20
+  - Resolved merge conflicts and maintained documentation
+
+### 🏠 Internal
+
+- **Authentication Fixes** - Multiple stability improvements (4fc7113)
+  - Resolved 307 redirect issues in authentication flow
+  - Improved JWT token handling
+- **Build System** - Webpack and Stripe configuration improvements (17da6ca)
+  - Fixed build errors and configuration issues
+  - Enhanced development workflow
+
+## [1.0.0] - 2025-08-02
 
 ### ✨ Added
 
@@ -160,4 +186,4 @@ This project follows conventional commit standards. When contributing:
 
 ---
 
-_Last updated: August 2, 2025_
+_Last updated: August 3, 2025_
