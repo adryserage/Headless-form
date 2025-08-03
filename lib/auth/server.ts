@@ -23,7 +23,7 @@ declare module "next-auth" {
 export const config = {
   adapter: DrizzleAdapter(db),
   session: {
-    strategy: "database",
+    strategy: "jwt", // Use JWT for Edge Runtime compatibility in middleware
   },
   trustHost: true,
   experimental: {
@@ -53,9 +53,10 @@ export const config = {
       session.user.id = token.id as string;
       return session;
     },
-    jwt({ token, user }) {
+    jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
+        token.email = user.email;
       }
       return token;
     },

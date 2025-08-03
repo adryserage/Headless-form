@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { auth } from "@/lib/auth";
+import { getToken } from "next-auth/jwt";
 
 export async function middleware(request: NextRequest) {
   // Get the pathname of the request
@@ -23,18 +23,30 @@ export async function middleware(request: NextRequest) {
 
   // Authentication is now enabled with GitHub OAuth as backup
 
-  // Check if user is authenticated using NextAuth
+  // Check if user is authenticated using JWT tokens (Edge Runtime compatible)
   console.log(`[Middleware] Checking authentication for: ${pathname}`);
   
   try {
-    // Get the session using NextAuth
-    const session = await auth();
+    // Get and validate the JWT token (Edge Runtime compatible)
+    const secret = process.env.NEXTAUTH_SECRET;
+    
+    if (!secret) {
+      console.error(`[Middleware] NEXTAUTH_SECRET is not defined`);
+      const loginUrl = new URL("/login", request.url);
+      return NextResponse.redirect(loginUrl);
+    }
 
-    console.log(`[Middleware] Valid session found:`, !!session);
+    const token = await getToken({ 
+      req: request, 
+      secret: secret,
+      salt: "authjs.session-token",
+    });
 
-    // If no valid session, redirect to login
-    if (!session) {
-      console.log(`[Middleware] No valid session, redirecting to login`);
+    console.log(`[Middleware] Valid token found:`, !!token);
+
+    // If no valid token, redirect to login
+    if (!token) {
+      console.log(`[Middleware] No valid token, redirecting to login`);
       const loginUrl = new URL("/login", request.url);
       return NextResponse.redirect(loginUrl);
     }
@@ -42,7 +54,7 @@ export async function middleware(request: NextRequest) {
     console.log(`[Middleware] Authentication successful, allowing access`);
     return NextResponse.next();
   } catch (error) {
-    console.error(`[Middleware] Error validating session:`, error);
+    console.error(`[Middleware] Error validating token:`, error);
     const loginUrl = new URL("/login", request.url);
     return NextResponse.redirect(loginUrl);
   }
