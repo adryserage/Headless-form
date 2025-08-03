@@ -43,6 +43,13 @@ export async function middleware(request: NextRequest) {
     });
 
     console.log(`[Middleware] Valid token found:`, !!token);
+    if (token) {
+      console.log(`[Middleware] Token details:`, { 
+        id: token.id, 
+        email: token.email,
+        exp: token.exp 
+      });
+    }
 
     // If no valid token, redirect to login
     if (!token) {

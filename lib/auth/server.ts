@@ -54,10 +54,18 @@ export const config = {
       return session;
     },
     jwt({ token, user, account }) {
+      console.log(`[JWT] Callback triggered with:`, { 
+        hasUser: !!user, 
+        hasToken: !!token, 
+        provider: account?.provider 
+      });
+      
       if (user) {
         token.id = user.id;
         token.email = user.email;
+        console.log(`[JWT] Setting token data:`, { id: user.id, email: user.email });
       }
+      
       return token;
     },
     authorized: async ({ auth }) => {
