@@ -20,6 +20,7 @@ export const config = {
   session: {
     strategy: "jwt",
   },
+  trustHost: true,
   providers: [
     Email({
       id: "email",

@@ -6,6 +6,8 @@ export async function middleware(request: NextRequest) {
   // Get the pathname of the request
   const { pathname } = request.nextUrl;
 
+  console.log(`[Middleware] ${request.method} ${pathname}`);
+
   // Allow access to auth pages and API routes
   if (
     pathname.startsWith("/api/") ||
@@ -15,23 +17,35 @@ export async function middleware(request: NextRequest) {
     pathname.includes(".") || // Static files
     pathname === "/"
   ) {
+    console.log(`[Middleware] Allowing access to: ${pathname}`);
     return NextResponse.next();
   }
 
   // Check if user is authenticated using JWT
-  const token = await getToken({
-    req: request,
-    secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "",
-    salt: "authjs.session-token",
-  });
+  console.log(`[Middleware] Checking authentication for: ${pathname}`);
+  
+  try {
+    const token = await getToken({
+      req: request,
+      secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+    });
 
-  // If not authenticated, redirect to login
-  if (!token) {
+    console.log(`[Middleware] Token found:`, !!token);
+
+    // If not authenticated, redirect to login
+    if (!token) {
+      console.log(`[Middleware] No token, redirecting to login`);
+      const loginUrl = new URL("/login", request.url);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    console.log(`[Middleware] Token valid, allowing access`);
+    return NextResponse.next();
+  } catch (error) {
+    console.error(`[Middleware] Error checking token:`, error);
     const loginUrl = new URL("/login", request.url);
     return NextResponse.redirect(loginUrl);
   }
-
-  return NextResponse.next();
 }
 
 export const config = {
