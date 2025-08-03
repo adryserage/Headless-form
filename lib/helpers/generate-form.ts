@@ -1,8 +1,116 @@
 /**
- * Generates a Shadcn form based on the provided schema and URL.
+ * Generates an HTML form based on the provided schema and URL.
  *
  * @param schema - The schema defining the form fields.
  * @param url - The URL to submit the form data to.
+ * @returns The generated HTML form as a string.
+ */
+export const generateHtmlForm = (schema: GeneralSchema[], url: string): string => {
+  const getHtmlInput = (field: GeneralSchema) => {
+    const required = field.required ? " required" : "";
+    const placeholder = field.placeholder ? ` placeholder="${field.placeholder}"` : "";
+    
+    switch (field.value) {
+      case "string":
+        return `<input type="text" name="${field.key}"${placeholder}${required} />`;
+      
+      case "email":
+        return `<input type="email" name="${field.key}"${placeholder}${required} />`;
+      
+      case "phone":
+        return `<input type="tel" name="${field.key}"${placeholder}${required} />`;
+      
+      case "url":
+        return `<input type="url" name="${field.key}"${placeholder}${required} />`;
+      
+      case "number":
+        const minMax = field.min !== undefined ? ` min="${field.min}"` : "";
+        const maxMax = field.max !== undefined ? ` max="${field.max}"` : "";
+        const step = field.step !== undefined ? ` step="${field.step}"` : "";
+        return `<input type="number" name="${field.key}"${placeholder}${minMax}${maxMax}${step}${required} />`;
+      
+      case "range":
+        const rangeMin = field.min !== undefined ? ` min="${field.min}"` : " min=\"0\"";
+        const rangeMax = field.max !== undefined ? ` max="${field.max}"` : " max=\"100\"";
+        const rangeStep = field.step !== undefined ? ` step="${field.step}"` : " step=\"1\"";
+        return `<input type="range" name="${field.key}"${rangeMin}${rangeMax}${rangeStep}${required} />`;
+      
+      case "date":
+        return `<input type="date" name="${field.key}"${required} />`;
+      
+      case "boolean":
+        return `<input type="checkbox" name="${field.key}" value="true" />`;
+      
+      case "textarea":
+        return `<textarea name="${field.key}"${placeholder}${required}></textarea>`;
+      
+      case "select":
+        const selectOptions = (field.options || []).map(option => 
+          `        <option value="${option}">${option}</option>`
+        ).join('\n');
+        return `<select name="${field.key}"${required}>
+        <option value="">Choose ${field.key}</option>
+${selectOptions}
+    </select>`;
+      
+      case "multiselect":
+        const multiselectOptions = (field.options || []).map(option => 
+          `        <option value="${option}">${option}</option>`
+        ).join('\n');
+        return `<select name="${field.key}" multiple${required}>
+${multiselectOptions}
+    </select>`;
+      
+      case "radio":
+        const radioOptions = (field.options || []).map(option => 
+          `        <input type="radio" name="${field.key}" value="${option}" id="${field.key}-${option}"${required} />
+        <label for="${field.key}-${option}">${option}</label>`
+        ).join('\n        ');
+        return `<div>
+        ${radioOptions}
+    </div>`;
+      
+      case "checkbox":
+        const checkboxOptions = (field.options || []).map(option => 
+          `        <input type="checkbox" name="${field.key}" value="${option}" id="${field.key}-${option}" />
+        <label for="${field.key}-${option}">${option}</label>`
+        ).join('\n        ');
+        return `<div>
+        ${checkboxOptions}
+    </div>`;
+      
+      case "file":
+        const accept = field.accept ? ` accept="${field.accept}"` : "";
+        const multiple = field.multiple ? " multiple" : "";
+        return `<input type="file" name="${field.key}"${accept}${multiple}${required} />`;
+      
+      case "color":
+        return `<input type="color" name="${field.key}"${required} />`;
+      
+      case "zip_code":
+        return `<input type="text" name="${field.key}" pattern="\\d{5}(?:[-\\s]\\d{4})?" title="Please enter a valid ZIP code"${placeholder}${required} />`;
+      
+      default:
+        return `<input type="text" name="${field.key}"${placeholder}${required} />`;
+    }
+  };
+
+  return `<form action="${url}" method="GET">
+    ${schema.map((field) => {
+      const label = field.label || field.key;
+      return `<!-- ${label}: ${field.value}${field.required ? ', Required' : ''} -->
+    <label for="${field.key}">${label}</label>
+    ${getHtmlInput(field)}`;
+    }).join('\n    \n')}
+    
+    <button type="submit">Submit</button>
+</form>`;
+};
+
+/**
+ * Generates a Shadcn form based on the provided schema and URL.
+ *
+ * @param schema - The schema defining the form fields.
  * @returns The generated Shadcn form as a string.
  */
 export const generateShadcnForm = (schema: GeneralSchema[]): string => {

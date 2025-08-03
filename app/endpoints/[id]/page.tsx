@@ -17,7 +17,7 @@ import { PageWrapper } from "@/components/parts/page-wrapper";
 import Image from "next/image";
 import Icon from "@/public/icon.svg";
 import CopyButton from "@/components/parts/copy-button";
-import { generateShadcnForm } from "@/lib/helpers/generate-form";
+import { generateShadcnForm, generateHtmlForm } from "@/lib/helpers/generate-form";
 import { notFound } from "next/navigation";
 import { loadEnvConfig } from "@next/env";
 loadEnvConfig("./", process.env.NODE_ENV !== "production");
@@ -64,19 +64,7 @@ export default async function Page({ params }: { params: { id: string } }) {
     body: JSON.stringify(${schemaString})
   })`;
 
-  const exampleForm = `<form action="${url}" method="GET">
-    ${schema.map(
-      (field) =>
-        `<input type="${
-          field.value === "boolean"
-            ? "checkbox"
-            : field.value === "number"
-              ? "number"
-              : "text"
-        }" name="${field.key}" />`,
-    )}
-    <button type="submit" value="Submit" />
-  </form>`;
+  const exampleForm = generateHtmlForm(schema, url);
 
   const shadcnForm = generateShadcnForm(schema);
 
