@@ -94,7 +94,7 @@ export const endpoints = pgTable("endpoint", {
     .references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   schema: jsonb("schema")
-    .$type<{ key: string; value: ValidationType }[]>()
+    .$type<GeneralSchema[]>()
     .notNull(),
   enabled: boolean("enabled").default(true).notNull(),
   webhookEnabled: boolean("webhookEnabled").default(false).notNull(),

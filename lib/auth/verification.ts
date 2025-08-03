@@ -28,7 +28,7 @@ export async function sendVerificationRequest(params: {
     console.log('Email sent successfully:', result.id);
   } catch (error) {
     console.error('Failed to send verification email:', error);
-    throw new Error(`Failed to send the verification email: ${error.message}`);
+    throw new Error(`Failed to send the verification email: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 

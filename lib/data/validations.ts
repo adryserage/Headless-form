@@ -9,7 +9,10 @@ export const getLeadDataSchema = z.object({
 });
 
 const ValidationType = z.enum(
-  ["phone", "email", "string", "number", "date", "boolean", "url", "zip_code"],
+  [
+    "string", "email", "phone", "number", "date", "boolean", "url", "zip_code",
+    "select", "multiselect", "radio", "checkbox", "textarea", "file", "range", "color"
+  ],
   {
     errorMap: () => ({ message: "Please select a valid field type." }),
   }
@@ -21,6 +24,14 @@ export const createEndpointFormSchema = z.object({
     z.object({
       key: z.string().min(1, { message: "Please enter a valid field name." }),
       value: ValidationType,
+      required: z.boolean().optional(),
+      options: z.array(z.string()).optional(),
+      placeholder: z.string().optional(),
+      min: z.number().optional(),
+      max: z.number().optional(),
+      step: z.number().optional(),
+      accept: z.string().optional(),
+      multiple: z.boolean().optional(),
     })
   ),
   formEnabled: z.boolean(),
@@ -37,6 +48,14 @@ export const updateEndpointFormSchema = z.object({
     z.object({
       key: z.string().min(1, { message: "Please enter a valid field name." }),
       value: ValidationType,
+      required: z.boolean().optional(),
+      options: z.array(z.string()).optional(),
+      placeholder: z.string().optional(),
+      min: z.number().optional(),
+      max: z.number().optional(),
+      step: z.number().optional(),
+      accept: z.string().optional(),
+      multiple: z.boolean().optional(),
     })
   ),
   formEnabled: z.boolean(),

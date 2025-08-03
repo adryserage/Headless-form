@@ -11,14 +11,22 @@ import validator from "validator";
  * 3. If necessary, add respective logic to correct / cast the type in the 'convertToCorrectTypes' function
  */
 export const validationOptions: { name: ValidationType }[] = [
-  { name: "phone" },
-  { name: "email" },
   { name: "string" },
+  { name: "email" },
+  { name: "phone" },
   { name: "number" },
   { name: "date" },
   { name: "boolean" },
   { name: "url" },
   { name: "zip_code" },
+  { name: "select" },
+  { name: "multiselect" },
+  { name: "radio" },
+  { name: "checkbox" },
+  { name: "textarea" },
+  { name: "file" },
+  { name: "range" },
+  { name: "color" },
 ];
 
 /**
@@ -31,7 +39,7 @@ export const validations: { [key in ValidationType]: z.ZodType<any, any> } = {
     message: "Not a valid phone number.",
   }),
   email: z.string().email("Not a valid email."),
-  string: z.string().min(2, "Not a valid string."),
+  string: z.string().min(1, "Field is required."),
   number: z.number().min(0, "Not a valid number."),
   date: z.date().min(new Date(), "Not a valid date."),
   boolean: z.boolean(),
@@ -40,6 +48,14 @@ export const validations: { [key in ValidationType]: z.ZodType<any, any> } = {
     .string()
     .min(5, "Not a valid zip code.")
     .max(5, "Not a valid zip code."),
+  select: z.string().min(1, "Please select an option."),
+  multiselect: z.array(z.string()).min(1, "Please select at least one option."),
+  radio: z.string().min(1, "Please select an option."),
+  checkbox: z.array(z.string()).min(1, "Please select at least one option."),
+  textarea: z.string().min(1, "Field is required."),
+  file: z.string().min(1, "Please upload a file."), // File path/URL after upload
+  range: z.number().min(0, "Invalid range value."),
+  color: z.string().regex(/^#[0-9A-F]{6}$/i, "Not a valid color."),
 };
 
 /**
@@ -59,10 +75,27 @@ export const convertToCorrectTypes = (
     if (value === "boolean") {
       // Convert "true" and "false" strings to boolean values
       result[key] = data[key] === "true";
-    } else if (value === "number") {
+    } else if (value === "number" || value === "range") {
       // Convert string to number, ensuring NaN is handled appropriately
       const num = Number(data[key]);
       result[key] = isNaN(num) ? undefined : num;
+    } else if (value === "multiselect" || value === "checkbox") {
+      // Ensure array format for multi-value fields
+      if (Array.isArray(data[key])) {
+        result[key] = data[key];
+      } else if (typeof data[key] === "string") {
+        // Handle comma-separated values or JSON string
+        try {
+          result[key] = JSON.parse(data[key]);
+        } catch {
+          result[key] = data[key].split(",").map((item: string) => item.trim());
+        }
+      } else {
+        result[key] = [];
+      }
+    } else if (value === "date") {
+      // Convert string to Date object
+      result[key] = data[key] ? new Date(data[key]) : undefined;
     } else {
       // For all other types, assume string or no conversion needed
       result[key] = data[key];

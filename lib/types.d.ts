@@ -24,6 +24,13 @@ type GeneralSchema = {
   key: string;
   value: ValidationType;
   required?: boolean;
+  options?: string[]; // For select, multiselect, radio, checkbox
+  placeholder?: string; // Custom placeholder text
+  min?: number; // For range, number
+  max?: number; // For range, number
+  step?: number; // For range, number
+  accept?: string; // For file input (e.g., "image/*", ".pdf")
+  multiple?: boolean; // For file input
 };
 
 /**
@@ -40,7 +47,15 @@ type ValidationType =
   | "date"
   | "boolean"
   | "url"
-  | "zip_code";
+  | "zip_code"
+  | "select"
+  | "multiselect"
+  | "radio"
+  | "checkbox"
+  | "textarea"
+  | "file"
+  | "range"
+  | "color";
 
 /**
  * Row type for the main dashboard data on /dashboard route

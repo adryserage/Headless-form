@@ -10,9 +10,11 @@ export const generateShadcnForm = (schema: GeneralSchema[]): string => {
     let zodType = "";
     switch (field.value) {
       case "string":
+      case "textarea":
         zodType = "z.string()";
         break;
       case "number":
+      case "range":
         zodType = "z.number()";
         break;
       case "date":
@@ -33,17 +35,37 @@ export const generateShadcnForm = (schema: GeneralSchema[]): string => {
       case "zip_code":
         zodType = "z.string().regex(/^\\d{5}(?:[-\\s]\\d{4})?$/)";
         break;
+      case "select":
+      case "radio":
+        zodType = "z.string()";
+        break;
+      case "multiselect":
+      case "checkbox":
+        zodType = "z.array(z.string())";
+        break;
+      case "file":
+        zodType = "z.string()";
+        break;
+      case "color":
+        zodType = "z.string().regex(/^#[0-9A-F]{6}$/i)";
+        break;
       default:
         zodType = "z.string()";
     }
     if (field.required) {
-      zodType += ".min(1, { message: 'This field is required' })";
+      if (field.value === "multiselect" || field.value === "checkbox") {
+        zodType += ".min(1, { message: 'Please select at least one option' })";
+      } else {
+        zodType += ".min(1, { message: 'This field is required' })";
+      }
     }
     return zodType;
   };
 
-  const getFieldComponent = (field: GeneralSchema) => {
-    if (field.value === "boolean") {
+  const getFieldComponent = (field: GeneralSchema, fieldDef: GeneralSchema) => {
+    const placeholder = fieldDef.placeholder || field.key;
+    
+    if (fieldDef.value === "boolean") {
       return `
         <Switch
           className="flex"
@@ -51,7 +73,7 @@ export const generateShadcnForm = (schema: GeneralSchema[]): string => {
           onCheckedChange={field.onChange}
         />
       `;
-    } else if (field.value === "date") {
+    } else if (fieldDef.value === "date") {
       return `
         <Popover>
           <PopoverTrigger className="flex" asChild>
@@ -76,12 +98,137 @@ export const generateShadcnForm = (schema: GeneralSchema[]): string => {
           </PopoverContent>
         </Popover>
       `;
-    } else {
+    } else if (fieldDef.value === "textarea") {
+      return `
+        <Textarea
+          placeholder="${placeholder}"
+          {...field}
+        />
+      `;
+    } else if (fieldDef.value === "select") {
+      const options = fieldDef.options || [];
+      return `
+        <Select onValueChange={field.onChange} defaultValue={field.value}>
+          <SelectTrigger>
+            <SelectValue placeholder="${placeholder}" />
+          </SelectTrigger>
+          <SelectContent>
+            ${options.map(option => `<SelectItem value="${option}">${option}</SelectItem>`).join('\n            ')}
+          </SelectContent>
+        </Select>
+      `;
+    } else if (fieldDef.value === "multiselect") {
+      const options = fieldDef.options || [];
+      return `
+        <div className="space-y-2">
+          {${JSON.stringify(options)}.map((option) => (
+            <div key={option} className="flex items-center space-x-2">
+              <Checkbox
+                id={\`${field.key}-\${option}\`}
+                checked={field.value?.includes(option)}
+                onCheckedChange={(checked) => {
+                  const currentValues = field.value || [];
+                  if (checked) {
+                    field.onChange([...currentValues, option]);
+                  } else {
+                    field.onChange(currentValues.filter((v) => v !== option));
+                  }
+                }}
+              />
+              <label htmlFor={\`${field.key}-\${option}\`}>{option}</label>
+            </div>
+          ))}
+        </div>
+      `;
+    } else if (fieldDef.value === "radio") {
+      const options = fieldDef.options || [];
+      return `
+        <RadioGroup value={field.value} onValueChange={field.onChange}>
+          {${JSON.stringify(options)}.map((option) => (
+            <div key={option} className="flex items-center space-x-2">
+              <RadioGroupItem value={option} id={\`${field.key}-\${option}\`} />
+              <label htmlFor={\`${field.key}-\${option}\`}>{option}</label>
+            </div>
+          ))}
+        </RadioGroup>
+      `;
+    } else if (fieldDef.value === "checkbox") {
+      const options = fieldDef.options || [];
+      return `
+        <div className="space-y-2">
+          {${JSON.stringify(options)}.map((option) => (
+            <div key={option} className="flex items-center space-x-2">
+              <Checkbox
+                id={\`${field.key}-\${option}\`}
+                checked={field.value?.includes(option)}
+                onCheckedChange={(checked) => {
+                  const currentValues = field.value || [];
+                  if (checked) {
+                    field.onChange([...currentValues, option]);
+                  } else {
+                    field.onChange(currentValues.filter((v) => v !== option));
+                  }
+                }}
+              />
+              <label htmlFor={\`${field.key}-\${option}\`}>{option}</label>
+            </div>
+          ))}
+        </div>
+      `;
+    } else if (fieldDef.value === "range") {
+      const min = fieldDef.min || 0;
+      const max = fieldDef.max || 100;
+      const step = fieldDef.step || 1;
+      return `
+        <div className="space-y-2">
+          <Slider
+            value={[field.value || ${min}]}
+            onValueChange={(value) => field.onChange(value[0])}
+            max={${max}}
+            min={${min}}
+            step={${step}}
+          />
+          <div className="text-sm text-muted-foreground">
+            Value: {field.value || ${min}}
+          </div>
+        </div>
+      `;
+    } else if (fieldDef.value === "file") {
+      const accept = fieldDef.accept || "*/*";
+      const multiple = fieldDef.multiple || false;
       return `
         <Input
-          placeholder="${field.key}"
+          type="file"
+          accept="${accept}"
+          ${multiple ? 'multiple' : ''}
+          onChange={(e) => {
+            const files = e.target.files;
+            if (files && files.length > 0) {
+              ${multiple ? 'field.onChange(Array.from(files).map(f => f.name));' : 'field.onChange(files[0].name);'}
+            }
+          }}
+        />
+      `;
+    } else if (fieldDef.value === "color") {
+      return `
+        <Input
+          type="color"
           {...field}
-          type="${field.value}"
+        />
+      `;
+    } else {
+      const inputType = fieldDef.value === "number" ? "number" : 
+                       fieldDef.value === "email" ? "email" : 
+                       fieldDef.value === "url" ? "url" : 
+                       fieldDef.value === "phone" ? "tel" : "text";
+      return `
+        <Input
+          placeholder="${placeholder}"
+          {...field}
+          type="${inputType}"
+          ${fieldDef.min !== undefined ? `min={${fieldDef.min}}` : ''}
+          ${fieldDef.max !== undefined ? `max={${fieldDef.max}}` : ''}
+          ${fieldDef.step !== undefined ? `step={${fieldDef.step}}` : ''}
         />
       `;
     }
@@ -89,6 +236,12 @@ export const generateShadcnForm = (schema: GeneralSchema[]): string => {
 
   const hasBooleanField = schema.some((field) => field.value === "boolean");
   const hasDateField = schema.some((field) => field.value === "date");
+  const hasTextareaField = schema.some((field) => field.value === "textarea");
+  const hasSelectField = schema.some((field) => field.value === "select");
+  const hasMultiselectField = schema.some((field) => field.value === "multiselect");
+  const hasRadioField = schema.some((field) => field.value === "radio");
+  const hasCheckboxField = schema.some((field) => field.value === "checkbox" || field.value === "multiselect");
+  const hasRangeField = schema.some((field) => field.value === "range");
 
   return `"use client";
 
@@ -116,6 +269,47 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+`
+    : ""
+}
+${
+  hasTextareaField
+    ? `
+import { Textarea } from "@/components/ui/textarea";
+`
+    : ""
+}
+${
+  hasSelectField
+    ? `
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+`
+    : ""
+}
+${
+  hasCheckboxField
+    ? `
+import { Checkbox } from "@/components/ui/checkbox";
+`
+    : ""
+}
+${
+  hasRadioField
+    ? `
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+`
+    : ""
+}
+${
+  hasRangeField
+    ? `
+import { Slider } from "@/components/ui/slider";
 `
     : ""
 }
@@ -156,7 +350,7 @@ export function RouterForm() {
             <FormItem>
               <FormLabel>${field.key}</FormLabel>
               <FormControl>
-                ${getFieldComponent(field)}
+                ${getFieldComponent(field, schema.find(f => f.key === field.key)!)}
               </FormControl>
               <FormDescription>
                 ${`Enter the ${field.key} for the endpoint.`}
