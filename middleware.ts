@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { auth } from "./lib/auth";
 
 export async function middleware(request: NextRequest) {
   // Get the pathname of the request
@@ -21,22 +20,24 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check if user is authenticated using NextAuth v5
+  // Check if user is authenticated using JWT token from cookies (Edge Runtime compatible)
   console.log(`[Middleware] Checking authentication for: ${pathname}`);
   
   try {
-    const session = await auth();
+    // Get the session token from cookies
+    const sessionToken = request.cookies.get("authjs.session-token") || 
+                        request.cookies.get("__Secure-authjs.session-token");
 
-    console.log(`[Middleware] Session found:`, !!session);
+    console.log(`[Middleware] Session token found:`, !!sessionToken);
 
-    // If not authenticated, redirect to login
-    if (!session) {
-      console.log(`[Middleware] No session, redirecting to login`);
+    // If no session token, redirect to login
+    if (!sessionToken) {
+      console.log(`[Middleware] No session token, redirecting to login`);
       const loginUrl = new URL("/login", request.url);
       return NextResponse.redirect(loginUrl);
     }
 
-    console.log(`[Middleware] Session valid, allowing access`);
+    console.log(`[Middleware] Session token valid, allowing access`);
     return NextResponse.next();
   } catch (error) {
     console.error(`[Middleware] Error checking session:`, error);
