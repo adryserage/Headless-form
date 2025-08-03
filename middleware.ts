@@ -8,6 +8,7 @@ export async function middleware(request: NextRequest) {
 
   console.log(`[Middleware] ${request.method} ${pathname}`);
 
+
   // Allow access to auth pages, API routes, and static files ONLY
   if (
     pathname.startsWith("/api/") ||

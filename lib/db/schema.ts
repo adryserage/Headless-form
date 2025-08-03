@@ -29,7 +29,8 @@ export const users = pgTable("user", {
     .notNull()
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name"),
-  email: text("email").notNull(),
+  email: text("email").notNull().unique(),
+  password: text("password"), // Added password field for email/password auth
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
   leadCount: integer("leadCount").notNull().default(0),

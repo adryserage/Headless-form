@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 
-import MagicLinkForm from "@/components/auth/form";
+import LoginForm from "@/components/auth/form";
 import { redirect } from "next/navigation";
 
 export default async function LoginPage() {
@@ -24,8 +24,14 @@ export default async function LoginPage() {
           Login to access your account.
         </p>
         <div className="flex flex-col items-center w-full gap-2">
-          <MagicLinkForm />
+          <LoginForm />
         </div>
+        <p className="text-center text-sm text-muted-foreground">
+          Don't have an account?{" "}
+          <Link href="/register" className="underline underline-offset-4">
+            Sign up
+          </Link>
+        </p>
       </div>
       <p className="mt-4 max-w-xs text-center text-sm text-muted-foreground md:mb-24">
         By using Headless Form, you agree to our{" "}
