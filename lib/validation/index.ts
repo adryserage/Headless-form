@@ -39,22 +39,21 @@ export const validations: { [key in ValidationType]: z.ZodType<any, any> } = {
     message: "Not a valid phone number.",
   }),
   email: z.string().email("Not a valid email."),
-  string: z.string().min(1, "Field is required."),
-  number: z.number().min(0, "Not a valid number."),
-  date: z.date().min(new Date(), "Not a valid date."),
+  string: z.string(),
+  number: z.number(),
+  date: z.date(),
   boolean: z.boolean(),
   url: z.string().url("Not a valid URL."),
   zip_code: z
     .string()
-    .min(5, "Not a valid zip code.")
-    .max(5, "Not a valid zip code."),
-  select: z.string().min(1, "Please select an option."),
-  multiselect: z.array(z.string()).min(1, "Please select at least one option."),
-  radio: z.string().min(1, "Please select an option."),
-  checkbox: z.array(z.string()).min(1, "Please select at least one option."),
-  textarea: z.string().min(1, "Field is required."),
-  file: z.string().min(1, "Please upload a file."), // File path/URL after upload
-  range: z.number().min(0, "Invalid range value."),
+    .regex(/^\d{5}$/, "Not a valid zip code."),
+  select: z.string(),
+  multiselect: z.array(z.string()),
+  radio: z.string(),
+  checkbox: z.array(z.string()),
+  textarea: z.string(),
+  file: z.string(), // File path/URL after upload
+  range: z.number(),
   color: z.string().regex(/^#[0-9A-F]{6}$/i, "Not a valid color."),
 };
 
@@ -114,9 +113,24 @@ export const convertToCorrectTypes = (
 export const generateDynamicSchema = (
   schema: GeneralSchema[],
 ): z.ZodRawShape => {
-  return schema.reduce<z.ZodRawShape>((acc, { key, value }) => {
-    const validation = validations[value];
+  return schema.reduce<z.ZodRawShape>((acc, { key, value, required }) => {
+    let validation: z.ZodType<any, any> = validations[value];
     if (validation) {
+      // Apply required validation based on the schema's required field
+      if (required) {
+        if (value === "string" || value === "textarea" || value === "file") {
+          validation = (validation as z.ZodString).min(1, "Field is required.");
+        } else if (value === "select" || value === "radio") {
+          validation = (validation as z.ZodString).min(1, "Please select an option.");
+        } else if (value === "multiselect" || value === "checkbox") {
+          validation = (validation as z.ZodArray<any>).min(1, "Please select at least one option.");
+        }
+      } else {
+        // Make field optional if not required
+        if (value !== "boolean") {
+          validation = validation.optional();
+        }
+      }
       acc[key as keyof SchemaToZodMap] = validation;
     }
     return acc;
