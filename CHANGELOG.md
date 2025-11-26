@@ -7,7 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - 2025-08-03
 
+### ⚠️ BREAKING CHANGES
+
+- **Authentication System Overhaul** (eea3ee7) - Complete migration from OAuth to credentials-based authentication
+  - ⚠️ **GitHub OAuth removed** - All existing OAuth sessions will be invalidated
+  - ⚠️ **Magic link authentication removed** - Email-only login no longer supported
+  - ⚠️ **Database migration required** - Password field added to users table
+  - ⚠️ **User re-registration required** - Existing users must create new accounts with passwords
+
 ### ✨ Added
+
+- **Email + Password Authentication** - Complete credentials-based auth system (eea3ee7)
+  - New user registration with email and password
+  - Secure password hashing using bcrypt
+  - Registration form with password confirmation validation
+  - Login form with email and password fields
+  - Password strength requirements (minimum 6 characters)
+  - Registration API endpoint with comprehensive validation
+  - Automatic redirect to registration from login page
 
 - **Enhanced HTML Form Generation** - Comprehensive field type support (849db31)
   - Created `generateHtmlForm` function handling all 16 field types
@@ -18,8 +35,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Fixed
 
+- **Authentication Middleware** - Resolved infinite redirect loops and JWT validation (375492b, 13cd508, 46e0e8b)
+  - Fixed JWT token configuration with proper salt and secure cookie settings
+  - Added comprehensive debugging logging for authentication flow
+  - Resolved Edge Runtime compatibility with JWT token validation
+  - Enhanced middleware authentication checks and error handling
+  - Fixed session token validation for production environments
+
 - **Authentication System** - Resolved OAuthAccountNotLinked error and enhanced security (e7113b7)
-  - Fixed GitHub OAuth account linking by switching to database sessions
+  - Fixed GitHub OAuth account linking by switching to database sessions  
   - Enabled `allowDangerousEmailAccountLinking` for proper account integration
   - Updated middleware to use `auth()` instead of JWT tokens for session validation
   - Enhanced security by protecting ALL pages (removed home page bypass)
@@ -31,10 +55,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Optional fields now properly work as optional during form submission
   - Removed hardcoded `.min(1)` validations for conditional application
 
-- **TypeScript Compatibility** - Resolved compilation errors (34b147d)
+- **TypeScript Compatibility** - Resolved compilation errors (34b147d, cc2b9b4)
   - Fixed form generation function type definitions
   - Corrected middleware JWT token validation types
   - Added proper TypeScript casting for Zod validation schemas
+  - Resolved NextAuth v5 TypeScript compilation errors
   - Ensured NextAuth.js integration works with latest type definitions
 
 - **Edge Runtime Compatibility** - Complete resolution of Node.js module errors (f85fbb9, 60b91a4, 8cc8d9b, 6d0cc49)
@@ -51,6 +76,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🔧 Changed
 
+- **Authentication Provider Migration** (eea3ee7)
+  - Removed GitHub OAuth provider completely
+  - Removed Email (magic link) provider completely
+  - Replaced with NextAuth Credentials provider
+  - Updated database schema with password field
+  - Modified authentication callbacks for JWT strategy
+  - Enhanced login and registration user experience
+
+- **Database Schema** (eea3ee7)
+  - Added password field to users table with bcrypt hashing
+  - Made email field unique constraint
+  - Updated Drizzle migrations for password support
+  - Enhanced user model for credentials authentication
+
 - **ESLint Configuration** - Migrated to modern flat config system (177411a, b5a0fa9)
   - Updated from deprecated `.eslintrc.json` to `eslint.config.js`
   - Added `@eslint/eslintrc` package for compatibility
@@ -58,6 +97,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Resolved merge conflicts and maintained documentation
 
 ### 🔒 Security
+
+- **Enhanced Password Security** (eea3ee7)
+  - Implemented bcrypt password hashing with salt rounds of 12
+  - Added password strength validation (minimum 6 characters)
+  - Secure credential validation in authentication flow
+  - Protection against password-based attacks through proper hashing
 
 - **Complete Authentication Protection** - Enhanced application security (e7113b7)
   - All application routes now require authentication (no unauthenticated access)
@@ -67,10 +112,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🏠 Internal
 
+- **Dependencies** (eea3ee7)
+  - Added bcryptjs and @types/bcryptjs for password hashing
+  - Added dotenv package for environment variable management
+  - Updated package.json with new authentication dependencies
+
 - **Build System** - Webpack and Stripe configuration improvements (17da6ca)
   - Fixed build errors and configuration issues
   - Enhanced Next.js configuration for server actions
   - Added server component external packages configuration
+
+### 📋 Migration Guide
+
+#### For Existing Users
+1. **Re-registration Required**: All existing users must create new accounts using email + password
+2. **GitHub OAuth Deprecated**: GitHub login is no longer available
+3. **Magic Links Deprecated**: Email-only login is no longer supported
+
+#### For Developers
+1. **Database Migration**: Run `npm run db:migrate` to add password field
+2. **Environment Variables**: Ensure NEXTAUTH_SECRET is configured
+3. **Authentication Flow**: Update any custom authentication logic for credentials provider
 
 ## [1.0.0] - 2025-08-02
 
